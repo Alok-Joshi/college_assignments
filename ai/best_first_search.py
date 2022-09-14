@@ -1,6 +1,6 @@
 ### Assignment 2
 from queue import PriorityQueue
-import pdb
+
 
 
 def hueristic(node):
@@ -30,8 +30,6 @@ path = []
 
 while(not pq.empty()):
       h,state= pq.get()
-     
-      #pdb.set_trace()
       visited[state] = True
       path.append(state)
       
