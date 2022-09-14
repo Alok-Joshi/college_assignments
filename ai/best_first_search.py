@@ -15,28 +15,35 @@ def hueristic(node):
 
 adj_mat = [[1,2],[0,3,4],[0,3,4],[0,1,2,4],[1,2,3]]
 
-visited = set()
+visited = list()
+
+for i in range(5):
+	visited.append(False)
+	
 start_state = 0
 goal_state =  4
 
 pq =PriorityQueue()
 
-pq.put(start_state)
+pq.put((hueristic(start_state),start_state))
 path = []
 
 while(not pq.empty()):
-      state = pq.get()
-      pdb.set_trace()
-      visited.add(state)
+      h,state= pq.get()
+     
+      #pdb.set_trace()
+      visited[state] = True
       path.append(state)
-
+      
+      print(visited)
       if(state == goal_state):
          break;
 
       else:
+        mat = adj_mat[state];
         for i in adj_mat[state]:
-                if(i not in visited):
-                    pq.put(hueristic(i))
+                if(visited[i] == False):
+                    pq.put((hueristic(i),i))
     
         
             
