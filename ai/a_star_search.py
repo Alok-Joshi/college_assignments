@@ -1,23 +1,86 @@
 from queue import PriorityQueue
+import copy
+
+def h(state_obj,goal_state):
+    """ Heuristic Function for State """
+    h_score = 0
+
+    for i in range(len(state_obj)):
+
+        for j in range(len(state_obj[i])):
+                if(state_obj[i][j] != goal_state[i][j]):
+                    h_score  = h_score +1 
+
+    return h_score
+
 class State:
-    def __init__(self,state,g):
-        self.state = state;
-        self.g = g;
+    def __init__(self,state_data,g,f_score)
+        self.state_data = state_data;
+        self.g = g
+        self.f_score = f_score
 
-def h(state):
-    """ Heuristic function """
-    pass
+    def generate_sucessor_states(self,goal_state):
+        """ Generates the sucessor states and returns them """
+        generated_nodes = []
+        es = []
+        for i in range(len(self.state_data)):
+            for j in range(len(self.state_data[i])):
+                if self.state_data[i][j] == -1:
+                   es.append(i)
+                   es.append(j)
+                   break
+                    
+        if((es[0]+1) < len(self.state_data) and (es[1]+1) < len(self.state_data[0])):
+                new_node = copy.deepcopy(self.state_data)
+                temp = new_node[es[0]][es[1]]
+                new_node[es[0]][es[1]] = new_node[es[0]+1][es[1]+1]
+                new_node[es[0]+1][es[1]+1] = temp
 
-def generate_sucessor_states(state_obj):
-    """ Generates the sucessor states """
-    pass
+                new_state = State(new_node,self.g+1,h(new_node,goal_state)+self.g+1)
+                generated_nodes.append(new_state)
 
-def a_start(initial_state,goal_state h,generate_sucessor_states):
-    closed_list =[]
+        if((es[0]-1)>= 0  and (es[1]-1)>=0):
+                new_node = copy.deepcopy(self.state_data)
+                temp = new_node[es[0]][es[1]]
+                new_node[es[0]][es[1]] = new_node[es[0]-1][es[1]-1]
+                new_node[es[0]-1][es[1]-1] = temp
+
+                new_state = State(new_node,self.g+1,h(new_node,goal_state)+self.g+1)
+                generated_nodes.append(new_state)
+
+
+        if((es[0]+1) < len(self.state_data) and (es[1]-1)>=0):
+                new_node = copy.deepcopy(self.state_data)
+                temp = new_node[es[0]][es[1]]
+                new_node[es[0]][es[1]] = new_node[es[0]+1][es[1]-1]
+                new_node[es[0]+1][es[1]-1] = temp
+
+                new_state = State(new_node,self.g+1,h(new_node,goal_state)+self.g+1)
+                generated_nodes.append(new_state)
+
+
+        if((es[0]-1) >= 0 and (es[1]+1) < len(self.state_data[0]) ):
+                new_node = copy.deepcopy(self.state_data)
+                temp = new_node[es[0]][es[1]]
+                new_node[es[0]][es[1]] = new_node[es[0]-1][es[1]+1]
+                new_node[es[0]-1][es[1]+1] = temp
+
+                new_state = State(new_node,self.g+1,h(new_node,goal_state)+self.g+1)
+                generated_nodes.append(new_state)
+        
+        return generated_nodes
+
+
+    def __hash__(self):
+        return hash((self.state_data,self.g,self.f_score))
+    def __eq__(self,other):
+        return (self.state_data == other.state_data) and (self.g == other.g) and (self.f_score == other.f_score)
+
+def a_star(initial_state,goal_state):
+    closed = dict() #a map containing visited States and their F scores 
     open_set =PriorityQueue()
     
-    init_state_obj = State(initial_state,0);
-    open_set.put((0,init_state_obj))
+    open_set.put((initial_state.f,initial_state))
 
     while(open_set.empty() == False):
 
@@ -26,16 +89,18 @@ def a_start(initial_state,goal_state h,generate_sucessor_states):
         if(state_obj == goal_state):
             return state_obj
 
+        elif(state_obj.state in closed):
+            if(state_obj.f_score < closed[state_obj]):
+                closed[state_obj] = state_obj.f_score
+            else:
+                continue
         else:
-            closed_list.append(state_obj)
-            generated_nodes = generate_sucessor_states(state_obj)
+            closed[state_obj.state] = state_obj.f_score
+            generated_nodes = state_obj.generate_sucessor_states()
 
             for node in generated_nodes:
-                if(node not in closed_list and node not in open_set):
-                    #if the generated node is already in the open set, we compare the g (Because h will be same). For now, i am assuming that the g of the node already in the open_set is lower, hence we ignore the generated node 
-                    res = State(node,1+state_obj.g)
-                    f = res.g + h(res)
-                    open_set.put((f,res))
+                if(node not in closed):
+                    open_set.put((node.f_score,node))
                 
 
 
